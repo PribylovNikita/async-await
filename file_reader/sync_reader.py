@@ -1,5 +1,9 @@
 import datetime
+import os
+import argparse
+import timeit
 import time
+
 
 def read_file(filename):
     with open(filename, mode='rb') as f:
@@ -8,14 +12,23 @@ def read_file(filename):
             time.sleep(0.001)
             data = f.read(1024)
             if not data:
-                print(filename, "done ###############")
                 break
-def main():
+
+
+def main(directory):
     begin = datetime.datetime.now()
-    files = ['/home/sia/tmp/{}'.format(i) for i in range(1, 11)]
+    files = [os.path.join(directory, file) for file in os.listdir(directory)]
     for f in files:
-        read_file(f)
+        if os.path.isfile(f):
+            read_file(f)
 
-    print(datetime.datetime.now() - begin)
 
-main()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Read all binary files from a directory.")
+    parser.add_argument("directory", type=str, help="The directory containing the binary files.")
+    args = parser.parse_args()
+
+    number_of_calls = 1
+    elapsed_time = timeit.timeit("main(args.directory)", globals=globals(), number=number_of_calls)
+    print(f"sync_reader: average runtime across {number_of_calls} trial(s) is "
+          f"{elapsed_time / number_of_calls:.4f} seconds")
